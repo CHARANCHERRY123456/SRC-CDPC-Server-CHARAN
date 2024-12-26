@@ -65,6 +65,7 @@ export const registerAlumni = asyncHandler(async (req, res) => {
     careerGoals,
     achievements,
     skills,
+    userType,
   } = req.body;
 console.log(req.body);
   if (!name || !email || !password || !batch || !branch) {
@@ -105,7 +106,8 @@ console.log(req.body);
     careerGoals,
     achievements,
     skills,
-    avatar:avatarUrl
+    avatar:avatarUrl,
+    userType,
 
   });
   
@@ -186,6 +188,32 @@ export const loginAlumni = asyncHandler(async(req,res)=>{
             "Alumni logged in successfully"
         )
     )
+})
+
+export const logoutAlumni = asyncHandler(async(req,res)=>{
+  await Alumni.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset:{
+        refreshToken:1
+      }
+    },
+    {
+      new :true
+    }
+  )
+
+
+  const options = {
+    httpOnly:true,
+    secure:true
+  }
+
+  return res
+  .status(200)
+  .clearCookie("accessToken",options)
+  .clearCookie("refreshToken",options)
+  .json(new ApiResponse(200,{},"Alumni logged out Successfully "))
 })
 
 /**

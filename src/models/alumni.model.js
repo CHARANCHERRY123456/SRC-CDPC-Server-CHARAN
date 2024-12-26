@@ -57,7 +57,7 @@ const alumniSchema = new Schema({
     linkedin: {
       type: String,
       trim: true,
-      match: [/^https?:\/\/(www\.)?linkedin\.com\/.*$/, "Invalid LinkedIn URL"],
+      // match: [/^https?:\/\/(www\.)?linkedin\.com\/.*$/, "Invalid LinkedIn URL"],
     },
     github: {
       type: String,
@@ -83,6 +83,11 @@ const alumniSchema = new Schema({
     type: [String],
     default: [],
   },
+  userType: {
+    type: String, // User type as a simple string
+    default: "alumni", // Set default to "student"
+    trim: true,
+  },
   
 },{timestamps:true}
 );
@@ -104,7 +109,7 @@ alumniSchema.methods.generateAccessToken= function(){
         {
           _id: this._id,
           email: this.email,
-          username: this.name, // Adjusted key for clarity
+          userType:this.userType,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -117,6 +122,7 @@ alumniSchema.methods.generateRefreshToken=function(){
   return jwt.sign(
       {
         _id: this._id,
+        userType:this.userType,
       },
       process.env.REFRESH_TOKEN_SECRET,
       {

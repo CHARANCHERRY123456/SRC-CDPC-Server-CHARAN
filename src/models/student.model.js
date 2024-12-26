@@ -65,6 +65,11 @@ const studentSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
     },
+    userType: {
+      type: String, // User type as a simple string
+      default: "student", // Set default to "student"
+      trim: true,
+    },
     refreshToken: {
       type: String,
     },
@@ -88,6 +93,7 @@ studentSchema.methods.generateAccessToken = function () {
     {
       _id: this._id,
       email: this.email,
+      userType:this.userType,
       // Adjusted key for clarity
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -102,6 +108,7 @@ studentSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
       _id: this._id,
+      userType:this.userType,
     },
     process.env.REFRESH_TOKEN_SECRET,
     {

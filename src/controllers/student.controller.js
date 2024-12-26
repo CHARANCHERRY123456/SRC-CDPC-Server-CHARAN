@@ -23,7 +23,7 @@ const generateAccessAndRefreshToken = async(userId)=>{
 
 // Controller to register a student
 const registerStudent = asyncHandler(async (req, res) => {
-  const { name, email, collegeId, year, branch, phone, skills, description, github, linkedIn, portfolio, password } = req.body;
+  const { name, email, collegeId, year, branch, phone, skills, description, github, linkedIn, portfolio, password ,userType} = req.body;
 
   // Check if all required fields are provided
   if (!name || !email || !collegeId || !year || !branch || !password) {
@@ -59,6 +59,7 @@ const registerStudent = asyncHandler(async (req, res) => {
     portfolio,
     avatar: avatarUrl,
     password,
+    userType,
   });
 
   const createdStudent = await Student.findById(newStudent._id).select(
@@ -117,6 +118,33 @@ const loginStudent = asyncHandler(async(req,res)=>{
     )
 })
 
+
+const logoutStudent = asyncHandler(async (req,res)=>{
+  await Student.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset:{
+        refreshToken:1
+      }
+    },
+    {
+      new :true
+    }
+  )
+
+
+  const options = {
+    httpOnly:true,
+    secure:true
+  }
+
+  return res
+  .status(200)
+  .clearCookie("accessToken",options)
+  .clearCookie("refreshToken",options)
+  .json(new ApiResponse(200,{},"User logged out successfully"))
+})
+
 // Controller to update student details
 // const updateStudentDetails = asyncHandler(async (req, res) => {
 //   const { id } = req.params;
@@ -162,4 +190,4 @@ const loginStudent = asyncHandler(async(req,res)=>{
 // });
 
 // Export all controllers
-export { registerStudent ,loginStudent};
+export { registerStudent ,loginStudent,logoutStudent};
