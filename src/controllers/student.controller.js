@@ -98,10 +98,15 @@ const loginStudent = asyncHandler(async(req,res)=>{
 
     const loggedInStudent= await Student.findById(student._id).select("-password -refreshToken")
 
-    const options={
-        httpOnly:true,
-        secure:true,
-    }
+    const options = {
+      httpOnly: true,
+      secure: true, // Set to false for local development
+      sameSite: 'None', 
+  };
+  
+  // console.log('Cookies set:', res.getHeaders()['set-cookie']);
+
+
     return res
     .status(200)
     .cookie("accessToken",accessToken,options)
@@ -131,12 +136,13 @@ const logoutStudent = asyncHandler(async (req,res)=>{
       new :true
     }
   )
-
+  console.log(req.cookies);
 
   const options = {
-    httpOnly:true,
-    secure:true
-  }
+    httpOnly: true,
+    secure: true, // Set to false for local development
+    sameSite: 'None', 
+};
 
   return res
   .status(200)

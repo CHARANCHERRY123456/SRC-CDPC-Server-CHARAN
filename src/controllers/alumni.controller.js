@@ -170,10 +170,12 @@ export const loginAlumni = asyncHandler(async(req,res)=>{
 
     const loggedInAlumni= await Alumni.findById(alumni._id).select("-password -refreshToken")
 
-    const options={
-        httpOnly:true,
-        secure:true,
-    }
+    const options = {
+      httpOnly: true,
+      secure: true, // Set to false for local development
+      sameSite: 'None', 
+  };
+  
     return res
     .status(200)
     .cookie("accessToken",accessToken,options)
@@ -205,9 +207,11 @@ export const logoutAlumni = asyncHandler(async(req,res)=>{
 
 
   const options = {
-    httpOnly:true,
-    secure:true
-  }
+    httpOnly: true,
+    secure: true, // Set to false for local development
+    sameSite: 'None', 
+};
+
 
   return res
   .status(200)
