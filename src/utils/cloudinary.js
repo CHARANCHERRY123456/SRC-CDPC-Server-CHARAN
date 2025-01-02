@@ -44,10 +44,11 @@ const deleteFromClodinary = async (publicId)=>{
             throw new ApiError("public id required for deletion")
         }
         const response=await cloudinary.uploader.destroy(publicId);
+        // console.log(response);
         return response;
     }catch(error){
         throw new ApiError(400,"Error whiile deleteing file")
     }
 }
 
-export {uploadOnCloudinary}
+export {uploadOnCloudinary,deleteFromClodinary}

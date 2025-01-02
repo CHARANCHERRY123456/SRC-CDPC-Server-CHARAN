@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Student } from "../models/student.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary ,deleteFromClodinary} from "../utils/cloudinary.js";
 
 
 const generateAccessAndRefreshToken = async(userId)=>{
@@ -41,7 +41,7 @@ const registerStudent = asyncHandler(async (req, res) => {
   if (req.file) {
     const uploadedImage = await uploadOnCloudinary(req.file.path);
     console.log(uploadedImage);
-    avatarUrl = uploadedImage.secure_url;
+    avatarUrl = uploadedImage?.secure_url;
   }
 
   // Create the student in the database
@@ -151,6 +151,69 @@ const logoutStudent = asyncHandler(async (req,res)=>{
   .json(new ApiResponse(200,{},"User logged out successfully"))
 })
 
+const getCurrentStudent = asyncHandler(async(req,res)=>{
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      req.user,
+      "Student fetched Successfully"
+    )
+  )
+})
+
+const updateAccountDetails = asyncHandler(async(req,res)=>{
+  const { name, email, collegeId, year, branch, phone, skills, description, github, linkedIn, portfolio ,userType} = req.body;
+
+  if (!name || !email || !collegeId || !year || !branch) {
+    throw new ApiError(400, "All required fields must be filled.");
+  }
+  const student = await Student.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        name, email, collegeId, year, branch, phone, skills, description, github, linkedIn, portfolio ,userType
+      }
+    },
+    {new:true}
+  ).select("-password")
+
+  return res.status(200)
+  .json(new ApiResponse(200,student,"Student details updated Successfully"))
+});
+
+const updateAvatar = asyncHandler(async (req,res)=>{
+  const avatarLocalPath=req.file.path
+  const student = await Student.findById(req.user._id)
+  if(!avatarLocalPath){
+    throw new ApiError(400,"Avatar file is missing");
+  }
+  // console.log(avatarLocalPath);
+
+  if(student.avatar){
+    const publicId = student.avatar.split("/").pop().split(".")[0];
+    await(deleteFromClodinary(publicId));
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if(!avatar){
+      throw new ApiError(400,"Error while uploading new avatar");
+  }
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set:{
+        avatar:avatar?.secure_url
+      }
+    },{
+      new :true
+    }
+  ).select("-password")
+
+  return res.status(200).json(
+    new ApiResponse(200,updatedStudent,"Avatar image updated Successfully")
+  )
+})
 // Controller to update student details
 // const updateStudentDetails = asyncHandler(async (req, res) => {
 //   const { id } = req.params;
@@ -196,4 +259,4 @@ const logoutStudent = asyncHandler(async (req,res)=>{
 // });
 
 // Export all controllers
-export { registerStudent ,loginStudent,logoutStudent};
+export { registerStudent ,loginStudent,logoutStudent,updateAvatar,updateAccountDetails,getCurrentStudent};

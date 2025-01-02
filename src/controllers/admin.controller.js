@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import Admin from "../models/admin.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary,deleteFromClodinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import Alumni from "../models/alumni.model.js";
@@ -73,7 +73,7 @@ const registerAdmin = asyncHandler(async (req,res)=>{
             throw new ApiError(500,"Failed to upload avatar to Cloudinary.");
         }
     }
-    console.log(avatarUrl);
+    // console.log(avatarUrl);
     const admin = await Admin.create({
         name,
         email,
@@ -177,4 +177,82 @@ const logoutAdmin = asyncHandler(async(req,res)=>{
   })
 
 
-export {registerAdmin,loginAdmin,logoutAdmin};
+
+  const getCurrentAdmin = asyncHandler(async(req,res)=>{
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        req.user,
+        "Admin fetched Successfully"
+      )
+    )
+  })
+  
+  const updateAccountDetails = asyncHandler(async(req,res)=>{
+    const {        
+        name,
+        email,
+        phone,
+        designation,
+        username,
+        employeeId,
+        } = req.body;
+  
+    if (!name || !email || !username || !employeeId) {
+      throw new ApiError(400, "All required fields must be filled.");
+    }
+    const admin = await Admin.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set:{
+            name,
+            email,
+            phone,
+            designation,
+            username,
+            employeeId,
+        }
+      },
+      {new:true}
+    ).select("-password")
+  
+    return res.status(200)
+    .json(new ApiResponse(200,admin,"Admin details updated Successfully"))
+  });
+  
+  const updateAvatar = asyncHandler(async (req,res)=>{
+    const avatarLocalPath=req.file.path
+    const admin = await Admin.findById(req.user._id)
+    if(!avatarLocalPath){
+      throw new ApiError(400,"Avatar file is missing");
+    }
+    // console.log(avatarLocalPath);
+  
+    if(admin.avatar){
+      const publicId = admin.avatar.split("/").pop().split(".")[0];
+      await(deleteFromClodinary(publicId));
+    }
+  
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatar){
+        throw new ApiError(400,"Error while uploading new avatar");
+    }
+  
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set:{
+          avatar:avatar?.secure_url
+        }
+      },{
+        new :true
+      }
+    ).select("-password")
+  
+    return res.status(200).json(
+      new ApiResponse(200,updatedAdmin,"Avatar image updated Successfully")
+    )
+  })
+
+
+export {registerAdmin,loginAdmin,logoutAdmin,updateAccountDetails,updateAvatar,getCurrentAdmin};

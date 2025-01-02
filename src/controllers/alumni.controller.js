@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import Alumni from "../models/alumni.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js"; // Optional for handling file uploads
+import { uploadOnCloudinary,deleteFromClodinary } from "../utils/cloudinary.js"; // Optional for handling file uploads
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 
@@ -218,6 +218,102 @@ export const logoutAlumni = asyncHandler(async(req,res)=>{
   .clearCookie("accessToken",options)
   .clearCookie("refreshToken",options)
   .json(new ApiResponse(200,{},"Alumni logged out Successfully "))
+})
+
+
+export const getCurrentAlumni = asyncHandler(async(req,res)=>{
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      req.user,
+      "Alumni fetched Successfully"
+    )
+  )
+})
+
+export const updateAccountDetails = asyncHandler(async(req,res)=>{
+  const {name,
+    email,
+    batch,
+    branch,
+    phone,
+    companyName,
+    designation,
+    workingLocation,
+    experience,
+    github,
+    linkedin,
+    portfolio,
+    facebook,
+    careerGoals,
+    achievements,
+    skills,
+    } = req.body;
+
+    if (!name || !email || !batch || !branch) {
+      throw new ApiError(400, "All required fields must be filled.");
+    }
+  const alumni = await Alumni.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        name,
+    email,
+    batch,
+    branch,
+    phone,
+    companyName,
+    designation,
+    workingLocation,
+    experience,
+    github,
+    linkedin,
+    portfolio,
+    facebook,
+    careerGoals,
+    achievements,
+    skills
+      }
+    },
+    {new:true}
+  ).select("-password")
+
+  return res.status(200)
+  .json(new ApiResponse(200,alumni,"Alumni details updated Successfully"))
+});
+
+export const updateAvatar = asyncHandler(async (req,res)=>{
+  const avatarLocalPath=req.file.path
+  const alumni = await Alumni.findById(req.user._id)
+  if(!avatarLocalPath){
+    throw new ApiError(400,"Avatar file is missing");
+  }
+  // console.log(avatarLocalPath);
+
+  if(alumni.avatar){
+    const publicId = alumni.avatar.split("/").pop().split(".")[0];
+    await(deleteFromClodinary(publicId));
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if(!avatar){
+      throw new ApiError(400,"Error while uploading new avatar");
+  }
+
+  const updatedAlumni = await Alumni.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set:{
+        avatar:avatar?.secure_url
+      }
+    },{
+      new :true
+    }
+  ).select("-password")
+
+  return res.status(200).json(
+    new ApiResponse(200,updatedAlumni,"Avatar image updated Successfully")
+  )
 })
 
 /**
