@@ -247,8 +247,8 @@ const logoutAdmin = asyncHandler(async(req,res)=>{
       },{
         new :true
       }
-    ).select("-password")
-  
+      ).select("-password")
+      
     return res.status(200).json(
       new ApiResponse(200,updatedAdmin,"Avatar image updated Successfully")
     )

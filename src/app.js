@@ -4,24 +4,26 @@ import cookieParser from 'cookie-parser'
 import studentRouter from './routes/studentRouter.js'
 import alumniRouter from "./routes/alumniRouter.js"
 import adminRouter from "./routes/adminRouter.js"
+import resource from './routes/resourceRouter.js';
 const app=express()
-
 app.use(cors({
     origin: 'http://localhost:3000', // Replace with your frontend domain
     credentials: true, // Allow cookies
 }));
 
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
-app.use(express.static("public"))
-app.use(cookieParser())
+app.use(express.static("public"));
+app.use(cookieParser());
 
-app.use("/api/student",studentRouter)
-app.use("/api/alumni",alumniRouter)
-app.use("/api/admin",adminRouter)
+app.use("/api/student",studentRouter);
+app.use("/api/alumni",alumniRouter);
+app.use("/api/admin",adminRouter);
+app.use("/api/resource" , resource);
 // app.use((req, res, next) => {
 //     console.log('Received Cookies:', req.cookies);
 //     next();
 // });
-export {app}
+export {app};
