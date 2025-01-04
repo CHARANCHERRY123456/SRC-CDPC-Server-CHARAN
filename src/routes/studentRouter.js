@@ -2,7 +2,7 @@ import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { getCurrentStudent, loginStudent, logoutStudent, registerStudent, updateAccountDetails, updateAvatar } from "../controllers/student.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-
+import { getJobPosts } from "../controllers/jobs.controller.js";
 const router = Router();
 
 // Student registration route
@@ -28,6 +28,6 @@ router
 
   router.route("/update-avatar").patch(verifyJWT,upload.single("avatar"),updateAvatar)
 
-
+  router.route("/get-job-posts").get(verifyJWT,getJobPosts);
 
 export default router;
