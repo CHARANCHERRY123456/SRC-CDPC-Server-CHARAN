@@ -230,6 +230,7 @@ const logoutAdmin = asyncHandler(async(req,res)=>{
   
     if(admin.avatar){
       const publicId = admin.avatar.split("/").pop().split(".")[0];
+      console.log(publicId);
       await(deleteFromClodinary(publicId));
     }
   
@@ -255,4 +256,4 @@ const logoutAdmin = asyncHandler(async(req,res)=>{
   })
 
 
-export {registerAdmin,loginAdmin,logoutAdmin,updateAccountDetails,updateAvatar,getCurrentAdmin};
+export {registerAdmin,loginAdmin,logoutAdmin,updateAccountDetails,updateAvatar,getCurrentAdmin,generateAccessAndRefreshToken};

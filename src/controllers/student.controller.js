@@ -259,4 +259,4 @@ const updateAvatar = asyncHandler(async (req,res)=>{
 // });
 
 // Export all controllers
-export { registerStudent ,loginStudent,logoutStudent,updateAvatar,updateAccountDetails,getCurrentStudent};
+export { registerStudent ,loginStudent,logoutStudent,updateAvatar,updateAccountDetails,getCurrentStudent,generateAccessAndRefreshToken};

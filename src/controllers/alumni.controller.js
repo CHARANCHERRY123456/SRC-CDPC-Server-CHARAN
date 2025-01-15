@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 
 
 
-const generateAccessAndRefreshToken = async(userId)=>{
+export const generateAccessAndRefreshToken = async(userId)=>{
     try{
         const alumni= await Alumni.findById(userId)
         // console.log(student);
@@ -256,8 +256,8 @@ export const updateAccountDetails = asyncHandler(async(req,res)=>{
   const alumni = await Alumni.findByIdAndUpdate(
     req.user?._id,
     {
-      $set:{
-        name,
+    $set:{
+    name,
     email,
     batch,
     branch,
@@ -292,6 +292,7 @@ export const updateAvatar = asyncHandler(async (req,res)=>{
 
   if(alumni.avatar){
     const publicId = alumni.avatar.split("/").pop().split(".")[0];
+    // console.log(publicId);
     await(deleteFromClodinary(publicId));
   }
 
