@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary,deleteFromClodinary } from "../utils/cloudinary.js";
-
+import { EventRegistration } from "../models/eventRegistration.model.js";
 import Event from "../models/event.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -125,6 +125,40 @@ const deleteEvent = asyncHandler(async(req,res)=>{
     }
     return res.status(200).json(new ApiResponse(200,deletedEvent,"Event deleted Successfully"));
 });
+
   
 
-export {createEvent,getAllEvents,getEventById,updateEvent,deleteEvent};
+
+// Update feedback for an event registration
+const updateFeedback = asyncHandler(async (req, res) => {
+  const { fullName, email, phone, feedback, eventId } = req.body; // Extract all required fields
+
+  // Validate input
+  if (!feedback || !fullName || !email || !phone || !eventId) {
+    throw new ApiError(400, "All fields are required (fullName, email, phone, eventId, and feedback).");
+  }
+
+// Find the registration where at least one field matches
+const registration = await EventRegistration.findOne({
+    eventId, // Mandatory to match the specific event
+    $or: [
+      { fullName },
+      { email },
+      { phone },
+    ],
+  });
+  
+  if (!registration) {
+    throw new ApiError(404, "No registration found with the provided details.");
+  }
+  
+
+  // Update the feedback field
+  registration.feedback = feedback;
+  await registration.save();
+
+  return res.status(200).json(new ApiResponse(200, registration, "Feedback updated successfully."));
+});
+
+
+export {createEvent,getAllEvents,getEventById,updateEvent,deleteEvent,updateFeedback};

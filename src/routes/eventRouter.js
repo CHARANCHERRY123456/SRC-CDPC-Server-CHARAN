@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import {createEvent,deleteEvent,getAllEvents, getEventById, updateEvent} from "../controllers/event.controller.js";
+import {createEvent,deleteEvent,getAllEvents, getEventById, updateEvent, updateFeedback} from "../controllers/event.controller.js";
 import { createRegistration, deleteRegistration, getAllRegistrations, updateRegistration,getRegistrationsByEventId } from "../controllers/eventRegistration.controller.js";
 
 const router=Router();
@@ -16,7 +16,7 @@ router.route("/id/:id")
 router.route("/registrations")
 .get(getAllRegistrations)
 .post(verifyJWT,createRegistration);
-
+router.route("/registrations/feedback").post(verifyJWT,updateFeedback);
 router.route("/registrations/event/:eventId").get(getRegistrationsByEventId);
 router.route("/registrations/id/:id")
 .delete(verifyJWT,deleteRegistration)
