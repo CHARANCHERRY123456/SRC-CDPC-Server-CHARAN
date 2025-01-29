@@ -10,8 +10,10 @@ const createCompany = asyncHandler(async (req, res) => {
       locations,
       website,
       headquarters,
-      contactDetails,
-      hiringPattern,
+      email,
+      phone,
+      preferredSkills,
+      preferredDepartments,
       placementStats,
       alumniProfiles,
       interviewExperiences,
@@ -27,18 +29,18 @@ const createCompany = asyncHandler(async (req, res) => {
     }
   
     // Validate website
-    if (website && !/^https?:\/\/[\w.-]+(?:\.[\w\.-]+)+[/#?]?.*$/.test(website)) {
+    if (website && !/^http?:\/\/[\w.-]+(?:\.[\w\.-]+)+[/#?]?.*$/.test(website)) {
       errors.push("Invalid website URL.");
     }
   
     // Validate contactDetails
-    if (contactDetails) {
-      if (contactDetails.email && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(contactDetails.email)) {
+    if (email || phone) {
+      if (email && !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
         errors.push("Invalid email address.");
       }
       if (
-        contactDetails.phone &&
-        !/^[0-9]{10,15}$/.test(contactDetails.phone)
+        phone &&
+        !/^[0-9]{10,15}$/.test(phone)
       ) {
         errors.push(
           "Phone number must be a numeric string with 10 to 15 digits."
@@ -156,21 +158,28 @@ const createCompany = asyncHandler(async (req, res) => {
     }
   
     // Create a new company
+  
     const newCompany = await Company.create({
       name,
       industry,
       locations,
       website,
       headquarters,
-      contactDetails,
-      hiringPattern,
+      contactDetails:{
+        email,
+        phone,
+      },
+      hiringPattern:{
+        preferredSkills,
+        preferredDepartments,
+      },
       placementStats,
       alumniProfiles,
       interviewExperiences,
       logo:logoUrl
     });
     res.status(201).json(
-      new ApiResponse(201, "Company created successfully", newCompany)
+      new ApiResponse(201,newCompany,"Company created successfully")
     );
   });
 // Get all companies
@@ -178,7 +187,7 @@ const getAllCompanies = asyncHandler(async (req, res) => {
     try {
       const companies = await Company.find();
       res.status(200).json(
-        new ApiResponse(200,"All companies fetched successfully",companies)
+        new ApiResponse(200,companies,"All companies fetched successfully")
       );
     } catch (error) {
         throw new ApiError(500,"Error fetching companies")
@@ -191,7 +200,7 @@ const getCompanyById = asyncHandler(async (req, res) => {
       if (!company) {
         throw new ApiError(404,"company not found");
       }
-      res.status(200).json(new ApiResponse(200,"Company fetched successfully",company));
+      res.status(200).json(new ApiResponse(200,company,"Company fetched successfully"));
     } catch (error) {
       throw new ApiError(500,"Error fetching company");
     }
@@ -205,7 +214,7 @@ const updateCompany = asyncHandler(async (req, res) => {
       if (!company) {
         throw new ApiError(404, 'Company not found');
       }
-      res.status(200).json(new ApiResponse(200, 'Company updated successfully', company));
+      res.status(200).json(new ApiResponse(200,company,'Company updated successfully'));
     } catch (error) {
       throw new ApiError(500, 'Error updating company');
     }
@@ -240,7 +249,7 @@ const updateLogo = asyncHandler(async (req, res) => {
     await company.save();
   
     return res.status(200).json(
-      new ApiResponse(200, "Logo updated successfully", company)
+      new ApiResponse(200, company,"Logo updated Successfully")
     );
   });
 

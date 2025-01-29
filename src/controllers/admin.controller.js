@@ -122,7 +122,7 @@ const loginAdmin = asyncHandler(async(req,res)=>{
     const {accessToken,refreshToken} = await generateAccessAndRefreshToken(admin._id);
 
     const loggedInAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
-    console.log(loggedInAdmin);
+    // console.log(loggedInAdmin);
     const options = {
         httpOnly:true,
         secure:true,
