@@ -10,6 +10,9 @@ import { ApiResponse } from './utils/ApiResponse.js'
 import { verifyJWT } from './middlewares/auth.middleware.js'
 import eventRouter from "./routes/eventRouter.js"
 import companyRouter from "./routes/companyRouter.js"
+import applicantRouter from "./routes/applicantRouter.js"
+import applicationRouter from "./routes/applicationRouter.js"
+import placementRouter from "./routes/placementRouter.js"
 const app=express()
 
 app.use(cors({
@@ -30,6 +33,9 @@ app.use("/api",authRouter)
 app.use("/api/event",eventRouter)
 app.use("/api/jobs-internships",jobAndInternshipRouter)
 app.use("/api/companies",companyRouter);
+app.use("/api/applicants",applicantRouter);
+app.use("/api/application",applicationRouter);
+app.use("/api/placement",placementRouter);
 // In your route handler
 app.get("/api/verify-jwt", verifyJWT, (req, res) => {
         // console.log("verifcation of jwt");
